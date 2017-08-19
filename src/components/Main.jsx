@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import { newBubbleName } from '../../bubbleConnGen.js';
 
 import MainScene from './MainScene.jsx';
-import { webRTCconnection } from './StunTurnController.js';
+import WebRTCconnection from './StunTurnController.jsx';
 import '../../public/Styles/main.scss';
 
 
@@ -20,17 +20,12 @@ class Main extends Component {
       remoteUser: 'No One!',
       pc1: '',
       pc2: '',
-      localVideo: null,
-      remoteVideo: null,
       room: '',
-      connected: false,
-      peerToPeer: new webRTCconnection(),
-      checked: true,
+      chatStarted: false
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.messageSubmit = this.messageSubmit.bind(this);
-    this.handleVideo = this.handleVideo.bind(this);
     this.newConnection = this.newConnection.bind(this);
 
     socket.on('connect', (data) => {
@@ -44,10 +39,9 @@ class Main extends Component {
       console.log('chat started!!')
       var room = data.room;
       var remoteUser = data.name;
-      var remoteVideo;
+      var chatStarted = true;
       console.log('started chatting!');
-      this.state.peerToPeer.createConnection();
-      this.setState({remoteUser, room, remoteVideo});
+      this.setState({remoteUser, room, chatStarted});
     });
     socket.on('video', (video) => {
       console.log(video);
@@ -69,28 +63,6 @@ class Main extends Component {
       this.setState({remoteVideo});
     });
 
-  }
-
-  componentDidUpdate() {
-    console.log(`REMOTE STREAM!:   :::::`)
-    console.log(this.state.peerToPeer);
-    var localVideo = this.state.peerToPeer.localStream;
-    if(localVideo && this.state.checked) {
-      var checked = false;
-      this.setState({localVideo, checked});
-    }
-  }
-
-  componentDidMount() {
-    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
-    if (navigator.getUserMedia) {
-        navigator.getUserMedia({video: true, audio: false}, this.handleVideo, this.videoError);
-    }
-  }
-
-  handleVideo(video) {
-    var localVideo = '';
-    this.setState({localVideo});
   }
 
   videoError() {
@@ -138,9 +110,10 @@ class Main extends Component {
               <input className="messageInput" type="text" value={this.state.value} onChange={this.handleChange}/>
               <button>Send</button>
             </form>
-            <video id="localStream" src={this.state.localVideo} autoPlay="true" />
+            <video id="localVideo" autoPlay="true" />
+            <video id="remoteVideo" autoPlay="true" />
+            {this.state.chatStarted ? <WebRTCconnection start={this.state.chatStarted}/> : null}
             <button className="leaveChat" onClick={this.newConnection} />
-            <video id="remoteStream" src={this.state.remoteVideo} autoPlay="true" />
         </div>
         <MainScene />
       </div>
