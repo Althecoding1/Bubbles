@@ -31,7 +31,17 @@ class webRTCconnection extends Component {
     this.onAddIceCandidateError = this.onAddIceCandidateError.bind(this);
     this.onIceStateChange = this.onIceStateChange.bind(this);
     this.nextUser = this.nextUser.bind(this);
+  }
+
+  componentDidMount() {
     this.createConnection();
+  }
+
+  componentWillReceiveProps(nextProps, nextState) {
+    
+    if(nextProps.end && !nextProps.start) {
+      this.nextUser();
+    }
   }
 
   getName(pc) {
@@ -62,7 +72,7 @@ class webRTCconnection extends Component {
       if (audioTracks.length > 0) {
         console.log('Using audio device: ' + audioTracks[0].label);
       }
-      let servers = null;
+      let servers = {"iceServers": [{"urls": "stun:stun.l.google.com:19302"}]};
       this.state.pc1 = new RTCPeerConnection(servers);
       this.state.pc1.onicecandidate = e => this.onIceCandidate(this.state.pc1, e);
       this.state.pc2 = new RTCPeerConnection(servers);
@@ -139,10 +149,15 @@ class webRTCconnection extends Component {
 
   nextUser() {
     console.log('Ending call');
-    this.state.pc1.close();
-    this.state.pc2.close();
-    pc1 = null, pc2 = null;
-    this.setState({pc1, pc2});
+    let pc1 = this.state.pc1, pc2 = this.state.pc2,
+    localVideo = this.state.localVideo, remoteVideo = this.state.remoteVideo;
+    pc1.close();
+    pc2.close();
+    pc1 = '';
+    pc2 = '';
+    localVido.srcObject = '';
+    remoteVideo.srcObject = '';
+    this.setState({pc1, pc2, localVideo, remoteVideo});
   }
 
   render() {

@@ -21,7 +21,10 @@ class Main extends Component {
       pc1: '',
       pc2: '',
       room: '',
-      chatStarted: false
+      chatStarted: false,
+      chatEnded: true,
+      connected: false,
+      chatFound: false
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -40,12 +43,11 @@ class Main extends Component {
       var room = data.room;
       var remoteUser = data.name;
       var chatStarted = true;
+      var chatFound = true;
+      var chatEnded = false;
       console.log('started chatting!');
-      this.setState({remoteUser, room, chatStarted});
+      this.setState({remoteUser, room, chatStarted, chatEnded, chatFound});
     });
-    socket.on('video', (video) => {
-      console.log(video);
-    })
     socket.on('message', (data) => {
       console.log(data);
       var messages = this.state.messages;
@@ -56,11 +58,10 @@ class Main extends Component {
       console.log('disconnected!');
       var remoteUser = "No One!";
       var messages = [];
-      this.setState({remoteUser, messages});
-    });
-    socket.on('video', (video) => {
-      let remoteVideo = video;
-      this.setState({remoteVideo});
+      var chatEnded = true;
+      var chatFound = false;
+      var chatStarted = false;
+      this.setState({remoteUser, messages, chatEnded, chatStarted, chatFound});
     });
 
   }
@@ -82,16 +83,19 @@ class Main extends Component {
   }
 
   newConnection() {
-    console.log(this.state.connected);
     if(this.state.connected) {
       console.log('Looking for new user');
       socket.emit('leave room');
-      var messages = [''];
+      var messages = [];
       this.setState({messages});
     }
   }
 
   render() {
+    let start = this.state.chatStarted;
+    let end = this.state.chatEnded;
+    let found = this.state.chatFound;
+    console.log(found);
     return(
       <div>
         <div className="individualChat">
@@ -112,7 +116,7 @@ class Main extends Component {
             </form>
             <video id="localVideo" autoPlay="true" />
             <video id="remoteVideo" autoPlay="true" />
-            {this.state.chatStarted ? <WebRTCconnection start={this.state.chatStarted}/> : null}
+            {found ? <WebRTCconnection start={start} end={end} found={found}/> : null}
             <button className="leaveChat" onClick={this.newConnection} />
         </div>
         <MainScene />
