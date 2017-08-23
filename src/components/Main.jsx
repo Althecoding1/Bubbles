@@ -95,7 +95,7 @@ class Main extends Component {
     let start = this.state.chatStarted;
     let end = this.state.chatEnded;
     let found = this.state.chatFound;
-    console.log(found);
+    console.log(found);   
     return(
       <div>
         <div className="individualChat">

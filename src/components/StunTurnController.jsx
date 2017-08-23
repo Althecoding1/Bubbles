@@ -38,7 +38,6 @@ class webRTCconnection extends Component {
   }
 
   componentWillReceiveProps(nextProps, nextState) {
-    
     if(nextProps.end && !nextProps.start) {
       this.nextUser();
     }
